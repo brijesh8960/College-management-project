@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>College Library Management</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h2>College Library Management</h2>
+
+  <form id="bookForm">
+    <input type="text" id="title" placeholder="Book Title" required>
+    <input type="text" id="author" placeholder="Author Name" required>
+    <select id="course" required>
+      <option value="">Select Course</option>
+      <option value="B.Tech">B.Tech</option>
+      <option value="B.Sc">B.Sc</option>
+      <option value="B.Com">B.Com</option>
+      <option value="MBA">MBA</option>
+    </select>
+    <input type="number" id="quantity" placeholder="Total Quantity" required>
+    <button type="submit">Add Book</button>
+  </form>
+
+  <input type="text" id="search" placeholder="Search by title, author, or course...">
+
+  <div id="bookList"></div>
+
+  <script>
+    const bookForm = document.getElementById('bookForm');
+    const bookList = document.getElementById('bookList');
+    const searchInput = document.getElementById('search');
+    let books = JSON.parse(localStorage.getItem('library_books')) || [];
+
+    function renderBooks(filter = '') {
+      bookList.innerHTML = '';
+      const filtered = books.filter(book =>
+        book.title.toLowerCase().includes(filter.toLowerCase()) ||
+        book.author.toLowerCase().includes(filter.toLowerCase()) ||
+        book.course.toLowerCase().includes(filter.toLowerCase())
+      );
+
+      const grouped = filtered.reduce((acc, book, index) => {
+        if (!acc[book.course]) acc[book.course] = [];
+        acc[book.course].push({ ...book, index });
+        return acc;
+      }, {});
+
+      for (let course in grouped) {
+        const section = document.createElement('div');
+        section.className = 'course-group';
+        section.innerHTML = `<h3>${course} Course</h3>`;
+        grouped[course].forEach(b => {
+          const div = document.createElement('div');
+          div.className = 'book-card';
+          div.innerHTML = `
+            <strong>${b.title}</strong> by ${b.author}<br>
+            Available: ${b.quantity}<br>
+            <button onclick="distributeBook(${b.index})">Distribute</button>
+            <button onclick="returnBook(${b.index})">Return</button>
+            <button onclick="deleteBook(${b.index})">Delete</button>
+          `;
+          section.appendChild(div);
+        });
+        bookList.appendChild(section);
+      }
+    }
+
+    bookForm.onsubmit = function (e) {
+      e.preventDefault();
+      const book = {
+        title: document.getElementById('title').value,
+        author: document.getElementById('author').value,
+        course: document.getElementById('course').value,
+        quantity: parseInt(document.getElementById('quantity').value)
+      };
+      books.push(book);
+      localStorage.setItem('library_books', JSON.stringify(books));
+      bookForm.reset();
+      renderBooks();
+    };
+
+    function distributeBook(index) {
+      if (books[index].quantity > 0) {
+        books[index].quantity--;
+        localStorage.setItem('library_books', JSON.stringify(books));
+        renderBooks();
+      } else {
+        alert("No more copies available!");
+      }
+    }
+
+    function returnBook(index) {
+      books[index].quantity++;
+      localStorage.setItem('library_books', JSON.stringify(books));
+      renderBooks();
+    }
+
+    function deleteBook(index) {
+      if (confirm("Delete this book?")) {
+        books.splice(index, 1);
+        localStorage.setItem('library_books', JSON.stringify(books));
+        renderBooks();
+      }
+    }
+
+    searchInput.addEventListener('input', () => {
+      renderBooks(searchInput.value);
+    });
+
+    renderBooks();
+  </script>
+  <style>
+      h2{
+    margin-top: 20px;
+    margin-bottom :50px;
+    font-size: 35px ;
+    font-family: 'Times New Roman', Times, serif;
+}
+    body {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+ background: linear-gradient(to right, #294d2c, #199321);
+  text-align: center;
+}
+
+form {
+  margin-bottom: 20px;
+}
+
+input, select {
+  padding: 10px;
+  margin: 5px;
+  width: 200px;
+}
+
+button {
+  padding: 10px 15px;
+  margin: 5px;
+  background-color: #088e27;
+  color: white;
+  /* border: none; */
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+button:hover {
+  background-color: #18f548;
+}
+
+#search {
+  margin-bottom: 20px;
+  width: 250px;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.course-group {
+  background: linear-gradient(to right, #366845, #34db4d);
+  padding: 15px;
+  margin: 15px auto;
+  width: 90%;
+  max-width: 600px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  text-align: left;
+}
+
+.book-card {
+  background: #93df97;
+  padding: 10px;
+  margin: 10px 0;
+  border-left: 4px solid #078a10;
+  border-radius: 4px;
+}
+
+  </style>
+</body>
+</html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>College Staff Management</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h2>College Staff Management</h2>
+
+  <form id="staffForm">
+    <input type="text" id="name" placeholder="Staff Name" required>
+    <input type="text" id="staffId" placeholder="Staff ID" required>
+    <input type="text" id="department" placeholder="Department" required>
+    <select id="field" required>
+      <option value="">Select Field</option>
+      <option value="Academic">Academic</option>
+      <option value="Administrative">Administrative</option>
+      <option value="Technical">Technical</option>
+      <option value="Support">Support</option>
+    </select>
+    <input type="text" id="contact" placeholder="Contact No." required>
+    <button type="submit">Add Staff</button>
+  </form>
+
+  <input type="text" id="search" placeholder="Search by name, field or department...">
+
+  <div id="staffList"></div>
+
+  <script>
+    const form = document.getElementById('staffForm');
+    const listDiv = document.getElementById('staffList');
+    const searchInput = document.getElementById('search');
+    let staffList = JSON.parse(localStorage.getItem('college_staff')) || [];
+
+    function renderStaff(filter = '') {
+      listDiv.innerHTML = '';
+      const filtered = staffList.filter(s =>
+        s.name.toLowerCase().includes(filter.toLowerCase()) ||
+        s.department.toLowerCase().includes(filter.toLowerCase()) ||
+        s.field.toLowerCase().includes(filter.toLowerCase())
+      );
+
+      const grouped = filtered.reduce((acc, staff, index) => {
+        if (!acc[staff.field]) acc[staff.field] = [];
+        acc[staff.field].push({ ...staff, index });
+        return acc;
+      }, {});
+
+      for (let field in grouped) {
+        const section = document.createElement('div');
+        section.className = 'field-group';
+        section.innerHTML = `<h3>${field} Field</h3>`;
+        grouped[field].forEach(s => {
+          const item = document.createElement('div');
+          item.className = 'staff-card';
+          item.innerHTML = `
+            <strong>${s.name}</strong> (ID: ${s.staffId})<br>
+            Dept: ${s.department}<br>
+            Contact: ${s.contact}<br>
+            <button onclick="editStaff(${s.index})">Edit</button>
+            <button onclick="deleteStaff(${s.index})">Delete</button>
+          `;
+          section.appendChild(item);
+        });
+        listDiv.appendChild(section);
+      }
+    }
+
+    form.onsubmit = function (e) {
+      e.preventDefault();
+      const staff = {
+        name: document.getElementById('name').value,
+        staffId: document.getElementById('staffId').value,
+        department: document.getElementById('department').value,
+        field: document.getElementById('field').value,
+        contact: document.getElementById('contact').value
+      };
+      staffList.push(staff);
+      localStorage.setItem('college_staff', JSON.stringify(staffList));
+      form.reset();
+      renderStaff();
+    };
+
+    function deleteStaff(index) {
+      if (confirm("Are you sure to delete this staff member?")) {
+        staffList.splice(index, 1);
+        localStorage.setItem('college_staff', JSON.stringify(staffList));
+        renderStaff();
+      }
+    }
+
+    function editStaff(index) {
+      const s = staffList[index];
+      document.getElementById('name').value = s.name;
+      document.getElementById('staffId').value = s.staffId;
+      document.getElementById('department').value = s.department;
+      document.getElementById('field').value = s.field;
+      document.getElementById('contact').value = s.contact;
+      staffList.splice(index, 1);
+      localStorage.setItem('college_staff', JSON.stringify(staffList));
+      renderStaff();
+    }
+
+    searchInput.addEventListener('input', () => {
+      renderStaff(searchInput.value);
+    });
+
+    renderStaff();
+  </script>
+  <style>
+
+  h2{
+    margin-top: 20px;
+    margin-bottom :50px;
+    font-size: 35px ;
+    font-family: 'Times New Roman', Times, serif;
+}
+    body {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  background: #07708a;
+  text-align: center;
+}
+
+form {
+  margin-bottom: 20px;
+}
+
+input, select {
+  margin: 5px;
+  padding: 10px;
+  width: 200px;
+}
+
+button {
+  padding: 10px 15px;
+  margin: 5px;
+  background-color: #17a2b8;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+button:hover {
+  background-color: #138496;
+}
+
+#search {
+  margin-bottom: 20px;
+  width: 250px;
+  padding: 10px;
+}
+
+.field-group {
+  background: #24a2b6;
+  margin: 15px auto;
+  padding: 15px;
+  width: 90%;
+  max-width: 600px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  text-align: left;
+}
+
+.staff-card {
+  background: #b5f1fa;
+  padding: 10px;
+  margin: 10px 0;
+  border-left: 4px solid #065b68;
+  border-radius: 5px;
+}
+
+  </style>
+</body>
+</html>

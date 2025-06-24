@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>College Student Management</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h2>College Student Management</h2>
+
+  <form id="studentForm">
+    <input type="text" id="name" placeholder="Student Name" required>
+    <input type="text" id="roll" placeholder="Roll No" required>
+    <select id="department" required>
+      <option value="">Select Department</option>
+      <option value="Computer Science">Computer Science</option>
+      <option value="Mechanical">Mechanical</option>
+      <option value="Electrical">Electrical</option>
+      <option value="Civil">Civil</option>
+    </select>
+    <select id="course" required>
+      <option value="">Select Course</option>
+      <option value="Web Development - Prof. A">Web Development - Prof. A</option>
+      <option value="Data Structures - Dr. B">Data Structures - Dr. B</option>
+      <option value="Thermodynamics - Prof. C">Thermodynamics - Prof. C</option>
+      <option value="Circuit Theory - Dr. D">Circuit Theory - Dr. D</option>
+    </select>
+    <select id="year" required>
+      <option value="">Year</option>
+      <option value="1st Year">1st Year</option>
+      <option value="2nd Year">2nd Year</option>
+      <option value="3rd Year">3rd Year</option>
+      <option value="4th Year">4th Year</option>
+    </select>
+    <input type="email" id="email" placeholder="Email" required>
+    <button type="submit">Add Student</button>
+  </form>
+
+  <input type="text" id="search" placeholder="Search by name, department or course...">
+
+  <div id="studentList"></div>
+
+  <script>
+    const form = document.getElementById('studentForm');
+    const listDiv = document.getElementById('studentList');
+    const searchInput = document.getElementById('search');
+    let students = JSON.parse(localStorage.getItem('college_students')) || [];
+
+    function renderStudents(filter = '') {
+      listDiv.innerHTML = '';
+      const filtered = students.filter(s =>
+        s.name.toLowerCase().includes(filter.toLowerCase()) ||
+        s.department.toLowerCase().includes(filter.toLowerCase()) ||
+        s.course.toLowerCase().includes(filter.toLowerCase())
+      );
+
+      if (filtered.length === 0) {
+        listDiv.innerHTML = '<p>No students found.</p>';
+        return;
+      }
+
+      filtered.forEach((s, index) => {
+        const card = document.createElement('div');
+        card.className = 'student-card';
+        card.innerHTML = `
+          <strong>${s.name}</strong> (Roll: ${s.roll})<br>
+          Dept: ${s.department} | Year: ${s.year}<br>
+          Course: ${s.course}<br>
+          Email: ${s.email}<br>
+          <button onclick="editStudent(${index})">Edit</button>
+          <button onclick="deleteStudent(${index})">Delete</button>
+        `;
+        listDiv.appendChild(card);
+      });
+    }
+
+    form.onsubmit = function (e) {
+      e.preventDefault();
+      const student = {
+        name: document.getElementById('name').value,
+        roll: document.getElementById('roll').value,
+        department: document.getElementById('department').value,
+        course: document.getElementById('course').value,
+        year: document.getElementById('year').value,
+        email: document.getElementById('email').value,
+      };
+      students.push(student);
+      localStorage.setItem('college_students', JSON.stringify(students));
+      form.reset();
+      renderStudents();
+    };
+
+    function deleteStudent(index) {
+      if (confirm('Are you sure to delete this student?')) {
+        students.splice(index, 1);
+        localStorage.setItem('college_students', JSON.stringify(students));
+        renderStudents();
+      }
+    }
+
+    function editStudent(index) {
+      const s = students[index];
+      document.getElementById('name').value = s.name;
+      document.getElementById('roll').value = s.roll;
+      document.getElementById('department').value = s.department;
+      document.getElementById('course').value = s.course;
+      document.getElementById('year').value = s.year;
+      document.getElementById('email').value = s.email;
+      students.splice(index, 1);
+      localStorage.setItem('college_students', JSON.stringify(students));
+      renderStudents();
+    }
+
+    searchInput.addEventListener('input', () => {
+      renderStudents(searchInput.value);
+    });
+
+    renderStudents();
+  </script>
+
+  <style>
+    h2{
+    margin-top: 20px;
+    margin-bottom :50px;
+    font-size: 35px ;
+    font-family: 'Times New Roman', Times, serif;
+}
+    body {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+   background: linear-gradient(to right, #502c48, #db347c);
+  text-align: center;
+}
+
+form {
+  margin-bottom: 20px;
+}
+
+input, select {
+  margin: 5px;
+  padding: 10px;
+  width: 200px;
+}
+
+button {
+  padding: 10px 15px;
+  margin: 5px;
+  background: linear-gradient(to right, #502c48, #db347c);
+  color: rgb(255, 255, 255);
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+button:hover {
+  background-color: #d10948;
+}
+
+#search {
+  margin-bottom: 20px;
+  width: 250px;
+  padding: 10px;
+  border-radius:10px;
+}
+
+.student-card {
+background: linear-gradient(to right, #56294c, #df0966);
+  padding: 15px;
+  margin: 10px auto;
+  width: 90%;
+  max-width: 500px;
+  border-left: 4px solid #584455;
+  border-radius: 5px;
+  box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+  text-align: left;
+}
+
+  </style>
+</body>
+</html>

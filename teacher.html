@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Teacher Management</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h2>Teacher Management System</h2>
+
+  <form id="teacherForm">
+    <input type="text" id="name" placeholder="Name" required>
+    <input type="text" id="subject" placeholder="Subject" required>
+    <select id="faculty" required>
+      <option value="">Select Faculty</option>
+      <option value="Science">Science</option>
+      <option value="Arts">Arts</option>
+      <option value="Commerce">Commerce</option>
+      <option value="Engineering">Engineering</option>
+    </select>
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="text" id="phone" placeholder="Phone" required>
+    <button type="submit">Add Teacher</button>
+  </form>
+
+  <input type="text" id="search" placeholder="Search by name or faculty...">
+
+  <div id="teacherList"></div>
+
+  <script>
+    const form = document.getElementById('teacherForm');
+    const listDiv = document.getElementById('teacherList');
+    const searchInput = document.getElementById('search');
+    let teachers = JSON.parse(localStorage.getItem('teachers')) || [];
+
+    function renderTeachers(filter = '') {
+      listDiv.innerHTML = '';
+      const grouped = teachers.reduce((acc, teacher, index) => {
+        if (
+          filter &&
+          !teacher.name.toLowerCase().includes(filter.toLowerCase()) &&
+          !teacher.faculty.toLowerCase().includes(filter.toLowerCase())
+        ) return acc;
+
+        if (!acc[teacher.faculty]) acc[teacher.faculty] = [];
+        acc[teacher.faculty].push({ ...teacher, index });
+        return acc;
+      }, {});
+
+      for (let faculty in grouped) {
+        const facultyDiv = document.createElement('div');
+        facultyDiv.className = 'faculty-group';
+        facultyDiv.innerHTML = `<h3>${faculty} Faculty</h3>`;
+        grouped[faculty].forEach(t => {
+          const p = document.createElement('div');
+          p.className = 'teacher-card';
+          p.innerHTML = `
+            <strong>${t.name}</strong> (${t.subject})<br>
+            Email: ${t.email}<br>
+            Phone: ${t.phone}<br>
+            <button onclick="editTeacher(${t.index})">Edit</button>
+            <button onclick="deleteTeacher(${t.index})">Delete</button>
+          `;
+          facultyDiv.appendChild(p);
+        });
+        listDiv.appendChild(facultyDiv);
+      }
+    }
+
+    form.onsubmit = (e) => {
+      e.preventDefault();
+      const newTeacher = {
+        name: document.getElementById('name').value,
+        subject: document.getElementById('subject').value,
+        faculty: document.getElementById('faculty').value,
+        email: document.getElementById('email').value,
+        phone: document.getElementById('phone').value
+      };
+      teachers.push(newTeacher);
+      localStorage.setItem('teachers', JSON.stringify(teachers));
+      form.reset();
+      renderTeachers();
+    };
+
+    function deleteTeacher(index) {
+      if (confirm("Are you sure to delete this teacher?")) {
+        teachers.splice(index, 1);
+        localStorage.setItem('teachers', JSON.stringify(teachers));
+        renderTeachers();
+      }
+    }
+
+    function editTeacher(index) {
+      const t = teachers[index];
+      document.getElementById('name').value = t.name;
+      document.getElementById('subject').value = t.subject;
+      document.getElementById('faculty').value = t.faculty;
+      document.getElementById('email').value = t.email;
+      document.getElementById('phone').value = t.phone;
+      teachers.splice(index, 1); // remove current record
+      localStorage.setItem('teachers', JSON.stringify(teachers));
+      renderTeachers();
+    }
+
+    searchInput.addEventListener('input', () => {
+      renderTeachers(searchInput.value);
+    });
+
+    renderTeachers();
+  </script>
+
+  <style>
+  h2{
+    margin-top: 20px;
+    margin-bottom :50px;
+    font-size: 35px ;
+    font-family: 'Times New Roman', Times, serif;
+}
+    body {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  background: #aa3096;
+  text-align: center;
+}
+
+form {
+  margin-bottom: 20px;
+}
+
+input, select {
+  margin: 5px;
+  padding: 10px;
+  width: 200px;
+}
+
+button {
+  padding: 10px 15px;
+  margin: 5px;
+  background-color: #a10892;
+  color: white;
+  /* border: none; */
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+button:hover {
+  background-color: #fe43e9;
+}
+
+#search {
+  margin-bottom: 20px;
+  width: 250px;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.faculty-group {
+ background: linear-gradient(to right, #5e3054, #db34c2);
+  margin: 15px auto;
+  padding: 15px;
+  width: 80%;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  text-align: left;
+}
+
+.teacher-card {
+  background: #f79ee6;
+  padding: 10px;
+  margin: 10px 0;
+  border-left: 4px solid #910cc1e1;
+  border-radius: 4px;
+}
+  </style>
+</body>
+</html>

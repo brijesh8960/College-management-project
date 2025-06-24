@@ -1,0 +1,27 @@
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  background: linear-gradient(to right, #50452c, #d5db34);
+}
+h1{
+    margin-top: 50px;
+    margin-bottom :200px;
+     font-size: 45px ;
+     text-decoration: underline;
+    font-family: 'Times New Roman', Times, serif;
+}
+.menu a {
+  display: inline-block;
+  
+  margin: 30px;
+  padding: 45px 50px;
+  background: linear-gradient(to right, #49502c, #8c934a);
+  color: #ffffff;
+  text-decoration: none;
+  border-radius: 8px;
+  font-size: larger;
+}
+
+.menu a:hover {
+   background: linear-gradient(to right, #2c3e50, #aedb34);
+}
